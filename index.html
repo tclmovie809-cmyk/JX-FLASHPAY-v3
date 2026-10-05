@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<title>JX FlashPay</title>
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    -webkit-tap-highlight-color:transparent;
+}
+
+:root{
+    --bg:#050505;
+    --card:#101010;
+    --card2:#151515;
+    --line:#252525;
+    --text:#fff;
+    --muted:#858585;
+    --purple:#8d55b8;
+    --purple2:#bd7be8;
+}
+
+body{
+    min-height:100vh;
+    background:#000;
+    color:var(--text);
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+button,
+input{
+    font:inherit;
+}
+
+button{
+    cursor:pointer;
+}
+
+.app{
+    min-height:100vh;
+    min-height:100dvh;
+    background:#000;
+    transition:
+        background .55s ease,
+        box-shadow .55s ease;
+}
+
+.app.on{
+    background:
+        radial-gradient(
+            circle at 50% 15%,
+            #38204b 0%,
+            #21122d 34%,
+            #0d0712 72%,
+            #000 100%
+        );
+}
+
+header{
+    height:68px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-bottom:1px solid rgba(255,255,255,.06);
+}
+
+.brand{
+    font-size:15px;
+    font-weight:800;
+    letter-spacing:3px;
+}
+
+.brand span{
+    color:#666;
+    font-weight:400;
+}
+
+.main{
+    width:100%;
+    max-width:500px;
+    min-height:calc(100vh - 68px);
+    margin:auto;
+    padding:42px 22px 25px;
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+}
+
+.status{
+    text-align:center;
+    margin-bottom:28px;
+}
+
+.status-caption{
+    color:#555;
+    font-size:10px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+}
+
+.status-value{
+    margin-top:7px;
+    font-size:14px;
+    font-weight:700;
+    color:#777;
+    transition:.4s;
+}
+
+.app.on .status-value{
+    color:#c58bea;
+}
+
+.flash{
+    width:218px;
+    height:285px;
+
+    border-radius:29px;
+
+    background:
+        linear-gradient(
+            145deg,
+            #151515,
+            #070707
+        );
+
+    border:1px solid #202020;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    box-shadow:
+        0 25px 65px rgba(0,0,0,.6);
+
+    transition:
+        transform .25s ease,
+        background .5s ease,
+        border-color .5s ease,
+        box-shadow .5s ease;
+}
+
+.flash:active{
+    transform:scale(.975);
+}
+
+.app.on .flash{
+    background:
+        linear-gradient(
+            145deg,
+            #2a173a,
+            #100817
+        );
+
+    border-color:#68417f;
+
+    box-shadow:
+        0 25px 75px rgba(104,55,140,.25);
+}
+
+.flash-circle{
+    width:92px;
+    height:92px;
+
+    border-radius:50%;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:#171717;
+    border:1px solid #2a2a2a;
+
+    font-size:42px;
+
+    transition:.5s;
+}
+
+.app.on .flash-circle{
+    background:#77439b;
+    border-color:#a36ac7;
+    box-shadow:
+        0 0 40px rgba(173,103,223,.3);
+}
+
+.flash-title{
+    margin-top:25px;
+    font-size:14px;
+    font-weight:800;
+    letter-spacing:3px;
+    color:#777;
+}
+
+.app.on .flash-title{
+    color:#dfc6ed;
+}
+
+.flash-sub{
+    margin-top:9px;
+    color:#444;
+    font-size:10px;
+}
+
+.app.on .flash-sub{
+    color:#80618e;
+}
+
+.footer{
+    margin-top:auto;
+    color:#383838;
+    font-size:10px;
+}
+
+
+/* =================================
+   MODAL SYSTEM
+================================= */
+
+.modal{
+    position:fixed;
+    inset:0;
+    z-index:50;
+
+    background:rgba(0,0,0,.76);
+
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+
+    opacity:0;
+    visibility:hidden;
+
+    transition:
+        opacity .28s ease,
+        visibility .28s ease;
+}
+
+.modal.show{
+    opacity:1;
+    visibility:visible;
+}
+
+.sheet{
+    width:100%;
+    max-width:500px;
+
+    max-height:94vh;
+    overflow-y:auto;
+
+    background:
+        linear-gradient(
+            180deg,
+            #141414,
+            #090909
+        );
+
+    border:1px solid #272727;
+    border-bottom:0;
+
+    border-radius:27px 27px 0 0;
+
+    padding:12px 20px 28px;
+
+    transform:translateY(100%);
+
+    transition:
+        transform .42s cubic-bezier(.2,.8,.2,1);
+}
+
+.modal.show .sheet{
+    transform:translateY(0);
+}
+
+.handle{
+    width:42px;
+    height:4px;
+    border-radius:20px;
+    background:#3a3a3a;
+    margin:2px auto 21px;
+}
+
+.sheet-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:24px;
+}
+
+.sheet-title{
+    font-size:20px;
+    font-weight:800;
+}
+
+.close{
+    width:35px;
+    height:35px;
+    border-radius:50%;
+    border:1px solid #2c2c2c;
+    background:#111;
+    color:#aaa;
+    font-size:20px;
+}
+
+.small-label{
+    color:#777;
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+}
+
+.big-price{
+    margin-top:7px;
+    font-size:45px;
+    font-weight:900;
+    letter-spacing:-2px;
+}
+
+
+/* =================================
+   AMOUNT
+================================= */
+
+.amount-list{
+    margin-top:25px;
+    display:grid;
+    gap:10px;
+}
+
+.amount-option{
+    width:100%;
+    min-height:69px;
+
+    border-radius:15px;
+
+    border:1px solid #272727;
+    background:#0d0d0d;
+
+    padding:0 16px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    color:#fff;
+
+    transition:.2s;
+}
+
+.amount-option.available:active{
+    transform:scale(.985);
+}
+
+.amount-option.selected{
+    border-color:#8952ae;
+    background:#170e1f;
+    box-shadow:0 0 0 1px rgba(137,82,174,.12);
+}
+
+.amount-left{
+    text-align:left;
+}
+
+.amount-value{
+    font-size:17px;
+    font-weight:800;
+}
+
+.amount-note{
+    margin-top:5px;
+    color:#666;
+    font-size:10px;
+}
+
+.amount-option.unavailable{
+    opacity:.38;
+    cursor:not-allowed;
+}
+
+.amount-option.unavailable .amount-note{
+    color:#805c5c;
+}
+
+.circle{
+    width:19px;
+    height:19px;
+
+    border-radius:50%;
+    border:1px solid #555;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.selected .circle{
+    border:5px solid #b873dc;
+}
+
+
+/* =================================
+   BUTTON
+================================= */
+
+.primary{
+    width:100%;
+    height:55px;
+
+    margin-top:19px;
+
+    border:0;
+    border-radius:14px;
+
+    background:#fff;
+    color:#000;
+
+    font-size:13px;
+    font-weight:900;
+    letter-spacing:.4px;
+
+    transition:.2s;
+}
+
+.primary:active{
+    transform:scale(.985);
+}
+
+.primary.disabled{
+    opacity:.35;
+    pointer-events:none;
+}
+
+
+/* =================================
+   PAYMENT METHODS
+================================= */
+
+.methods{
+    display:grid;
+    gap:10px;
+    margin-top:20px;
+}
+
+.method{
+    min-height:72px;
+
+    border:1px solid #282828;
+    border-radius:15px;
+
+    background:#0d0d0d;
+
+    padding:10px 12px;
+
+    display:flex;
+    align-items:center;
+
+    transition:.2s;
+}
+
+.method.selected{
+    border-color:#8b55ae;
+    background:#170e1f;
+}
+
+.payment-logo{
+    width:48px;
+    height:48px;
+
+    border-radius:12px;
+
+    background:#181818;
+
+    border:1px solid #242424;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    overflow:hidden;
+
+    margin-right:13px;
+}
+
+.payment-logo img{
+    width:100%;
+    height:100%;
+    object-fit:contain;
+}
+
+.logo-placeholder{
+    font-size:18px;
+    font-weight:900;
+    color:#888;
+}
+
+.method-info{
+    flex:1;
+}
+
+.method-name{
+    font-size:14px;
+    font-weight:800;
+}
+
+.method-sub{
+    margin-top:5px;
+    color:#666;
+    font-size:10px;
+}
+
+.radio{
+    width:20px;
+    height:20px;
+    border-radius:50%;
+    border:1px solid #555;
+}
+
+.method.selected .radio{
+    border:5px solid #b975df;
+}
+
+
+/* =================================
+   CONFIRM
+================================= */
+
+.confirm-box{
+    text-align:center;
+    padding:15px 0 5px;
+}
+
+.confirm-icon{
+    width:70px;
+    height:70px;
+
+    border-radius:50%;
+
+    margin:0 auto 19px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#1c1025;
+    border:1px solid #75479a;
+
+    color:#c88ce7;
+    font-size:28px;
+}
+
+.confirm-title{
+    font-size:21px;
+    font-weight:800;
+}
+
+.confirm-text{
+    margin-top:8px;
+    color:#707070;
+    font-size:11px;
+    line-height:1.5;
+}
+
+.confirm-price{
+    margin-top:25px;
+    font-size:40px;
+    font-weight:900;
+}
+
+.confirm-method{
+    margin-top:7px;
+    color:#888;
+    font-size:11px;
+}
+
+.security{
+    margin-top:22px;
+
+    padding:12px;
+
+    border-radius:11px;
+
+    background:#0d0d0d;
+    border:1px solid #222;
+
+    color:#666;
+    font-size:10px;
+    line-height:1.5;
+}
+
+.hidden{
+    display:none!important;
+}
+
+
+/* =================================
+   TOAST
+================================= */
+
+.toast{
+    position:fixed;
+    left:50%;
+    bottom:25px;
+
+    transform:
+        translate(-50%,20px);
+
+    width:calc(100% - 40px);
+    max-width:420px;
+
+    padding:13px 15px;
+
+    border-radius:12px;
+
+    background:#191919;
+    border:1px solid #303030;
+
+    color:#ddd;
+    font-size:11px;
+    text-align:center;
+
+    opacity:0;
+    pointer-events:none;
+
+    transition:.3s;
+
+    z-index:100;
+}
+
+.toast.show{
+    opacity:1;
+    transform:translate(-50%,0);
+}
+
+
+/* =================================
+   SMALL DEVICES
+================================= */
+
+@media(max-height:650px){
+
+    .main{
+        padding-top:25px;
+    }
+
+    .flash{
+        height:245px;
+    }
+
+    .flash-circle{
+        width:75px;
+        height:75px;
+        font-size:34px;
+    }
+
+}
+</style>
+</head>
+
+<body>
+
+<div id="app" class="app">
+
+<header>
+    <div class="brand">
+        JX <span>FLASHPAY</span>
+    </div>
+</header>
+
+<main class="main">
+
+    <div class="status">
+
+        <div class="status-caption">
+            Flashlight
+        </div>
+
+        <div id="statusValue"
+             class="status-value">
+            OFF
+        </div>
+
+    </div>
+
+
+    <button id="flashButton"
+            class="flash"
+            onclick="flashAction()">
+
+        <div id="flashCircle"
+             class="flash-circle">
+            🔦
+        </div>
+
+        <div id="flashTitle"
+             class="flash-title">
+            OFF
+        </div>
+
+        <div class="flash-sub">
+            Tap to control
+        </div>
+
+    </button>
+
+
+    <div class="footer">
+        JX FlashPay
+    </div>
+
+</main>
+
+</div>
+
+
+<!-- ===============================
+     AMOUNT MODAL
+================================ -->
+
+<div id="amountModal"
+     class="modal">
+
+<div class="sheet">
+
+    <div class="handle"></div>
+
+    <div class="sheet-head">
+
+        <div class="sheet-title">
+            Payment
+        </div>
+
+        <button class="close"
+                onclick="closeAmount()">
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="small-label">
+        Amount required
+    </div>
+
+    <div class="big-price">
+        ₱499
+    </div>
+
+
+    <div class="amount-list">
+
+        <!-- 999 -->
+
+        <button class="amount-option unavailable">
+
+            <div class="amount-left">
+
+                <div class="amount-value">
+                    ₱999
+                </div>
+
+                <div class="amount-note">
+                    Not available
+                </div>
+
+            </div>
+
+            <div class="circle"></div>
+
+        </button>
+
+
+        <!-- 599 -->
+
+        <button class="amount-option unavailable">
+
+            <div class="amount-left">
+
+                <div class="amount-value">
+                    ₱599
+                </div>
+
+                <div class="amount-note">
+                    Not available
+                </div>
+
+            </div>
+
+            <div class="circle"></div>
+
+        </button>
+
+
+        <!-- 499 -->
+
+        <button id="amount499"
+                class="amount-option available"
+                onclick="select499()">
+
+            <div class="amount-left">
+
+                <div class="amount-value">
+                    ₱499
+                </div>
+
+                <div class="amount-note">
+                    Available
+                </div>
+
+            </div>
+
+            <div class="circle"></div>
+
+        </button>
+
+    </div>
+
+
+    <button id="amountContinue"
+            class="primary disabled"
+            onclick="goMethods()">
+
+        CONTINUE
+
+    </button>
+
+</div>
+
+</div>
+
+
+<!-- ===============================
+     PAYMENT METHOD MODAL
+================================ -->
+
+<div id="methodModal"
+     class="modal">
+
+<div class="sheet">
+
+    <div class="handle"></div>
+
+    <div class="sheet-head">
+
+        <div class="sheet-title">
+            Payment method
+        </div>
+
+        <button class="close"
+                onclick="closeMethods()">
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="small-label">
+        Amount
+    </div>
+
+    <div class="big-price">
+        ₱499
+    </div>
+
+
+    <div class="methods">
+
+        <!-- GCASH -->
+
+        <button class="method"
+                onclick="selectMethod(this,'GCash')">
+
+            <div class="payment-logo">
+
+                <!-- Replace the empty src with your logo URL if desired -->
+
+                <img src=""
+                     alt="GCash"
+                     onerror="hideLogo(this)">
+
+                <div class="logo-placeholder">
+                    G
+                </div>
+
+            </div>
+
+            <div class="method-info">
+
+                <div class="method-name">
+                    GCash
+                </div>
+
+                <div class="method-sub">
+                    Mobile payment
+                </div>
+
+            </div>
+
+            <div class="radio"></div>
+
+        </button>
+
+
+        <!-- PAYPAL -->
+
+        <button class="method"
+                onclick="selectMethod(this,'PayPal')">
+
+            <div class="payment-logo">
+
+                <img src=""
+                     alt="PayPal"
+                     onerror="hideLogo(this)">
+
+                <div class="logo-placeholder">
+                    P
+                </div>
+
+            </div>
+
+            <div class="method-info">
+
+                <div class="method-name">
+                    PayPal
+                </div>
+
+                <div class="method-sub">
+                    Online payment
+                </div>
+
+            </div>
+
+            <div class="radio"></div>
+
+        </button>
+
+
+        <!-- MAYA -->
+
+        <button class="method"
+                onclick="selectMethod(this,'Maya')">
+
+            <div class="payment-logo">
+
+                <img src=""
+                     alt="Maya"
+                     onerror="hideLogo(this)">
+
+                <div class="logo-placeholder">
+                    M
+                </div>
+
+            </div>
+
+            <div class="method-info">
+
+                <div class="method-name">
+                    Maya
+                </div>
+
+                <div class="method-sub">
+                    Mobile payment
+                </div>
+
+            </div>
+
+            <div class="radio"></div>
+
+        </button>
+
+    </div>
+
+
+    <button id="methodContinue"
+            class="primary disabled"
+            onclick="goConfirm()">
+
+        CONTINUE
+
+    </button>
+
+</div>
+
+</div>
+
+
+<!-- ===============================
+     CONFIRMATION MODAL
+================================ -->
+
+<div id="confirmModal"
+     class="modal">
+
+<div class="sheet">
+
+    <div class="handle"></div>
+
+    <div class="sheet-head">
+
+        <div class="sheet-title">
+            Confirm
+        </div>
+
+        <button class="close"
+                onclick="closeConfirm()">
+            ×
+        </button>
+
+    </div>
+
+
+    <div class="confirm-box">
+
+        <div class="confirm-icon">
+            ✓
+        </div>
+
+        <div class="confirm-title">
+            Review payment
+        </div>
+
+        <div class="confirm-text">
+            Check the amount and selected
+            payment method before continuing.
+        </div>
+
+        <div class="confirm-price">
+            ₱499
+        </div>
+
+        <div id="confirmMethod"
+             class="confirm-method">
+            GCash
+        </div>
+
+
+        <div class="security">
+            No transaction or money transfer is
+            performed by this webpage.
+        </div>
+
+
+        <button class="primary"
+                onclick="finishPayment()">
+
+            CONFIRM
+
+        </button>
+
+    </div>
+
+</div>
+
+</div>
+
+
+<div id="toast"
+     class="toast">
+</div>
+
+
+<script>
+
+let flashlightTrack = null;
+let flashlightOn = false;
+
+let amountSelected = false;
+let selectedMethod = "";
+
+
+/* =================================
+   FLASHLIGHT
+================================= */
+
+async function turnOnFlashlight(){
+
+    try{
+
+        if(
+            !navigator.mediaDevices ||
+            !navigator.mediaDevices.getUserMedia
+        ){
+
+            showToast(
+                "Flashlight control is not supported here."
+            );
+
+            return;
+
+        }
+
+
+        const stream =
+            await navigator.mediaDevices.getUserMedia({
+
+                video:{
+                    facingMode:{
+                        ideal:"environment"
+                    }
+                }
+
+            });
+
+
+        const track =
+            stream.getVideoTracks()[0];
+
+
+        const capabilities =
+            track.getCapabilities();
+
+
+        if(!capabilities.torch){
+
+            track.stop();
+
+            showToast(
+                "Torch control is not supported by this browser."
+            );
+
+            return;
+
+        }
+
+
+        await track.applyConstraints({
+
+            advanced:[
+                {
+                    torch:true
+                }
+            ]
+
+        });
+
+
+        flashlightTrack = track;
+        flashlightOn = true;
+
+        updateFlashUI();
+
+    }
+    catch(error){
+
+        console.log(error);
+
+        showToast(
+            "Allow camera permission to control the flashlight."
+        );
+
+    }
+
+}
+
+
+function turnOffFlashlight(){
+
+    if(!flashlightTrack){
+        return;
+    }
+
+
+    try{
+
+        flashlightTrack
+            .applyConstraints({
+
+                advanced:[
+                    {
+                        torch:false
+                    }
+                ]
+
+            })
+            .catch(()=>{});
+
+    }
+    catch(e){}
+
+
+    try{
+        flashlightTrack.stop();
+    }
+    catch(e){}
+
+
+    flashlightTrack = null;
+    flashlightOn = false;
+
+    updateFlashUI();
+
+}
+
+
+/* =================================
+   MAIN ACTION
+================================= */
+
+function flashAction(){
+
+    if(!flashlightOn){
+
+        turnOnFlashlight();
+
+    }
+    else{
+
+        openAmount();
+
+    }
+
+}
+
+
+/* =================================
+   FLASH UI
+================================= */
+
+function updateFlashUI(){
+
+    const app =
+        document.getElementById("app");
+
+    const status =
+        document.getElementById("statusValue");
+
+    const title =
+        document.getElementById("flashTitle");
+
+
+    if(flashlightOn){
+
+        app.classList.add("on");
+
+        status.textContent = "ON";
+        title.textContent = "ON";
+
+    }
+    else{
+
+        app.classList.remove("on");
+
+        status.textContent = "OFF";
+        title.textContent = "OFF";
+
+    }
+
+}
+
+
+/* =================================
+   AMOUNT
+================================= */
+
+function openAmount(){
+
+    document
+        .getElementById("amountModal")
+        .classList.add("show");
+
+}
+
+
+function closeAmount(){
+
+    document
+        .getElementById("amountModal")
+        .classList.remove("show");
+
+}
+
+
+function select499(){
+
+    amountSelected = true;
+
+    const item =
+        document.getElementById("amount499");
+
+    const button =
+        document.getElementById("amountContinue");
+
+
+    item.classList.add("selected");
+
+    button.classList.remove("disabled");
+
+}
+
+
+/* =================================
+   PAYMENT METHODS
+================================= */
+
+function goMethods(){
+
+    if(!amountSelected){
+        return;
+    }
+
+
+    closeAmount();
+
+
+    setTimeout(()=>{
+
+        document
+            .getElementById("methodModal")
+            .classList.add("show");
+
+    },120);
+
+}
+
+
+function closeMethods(){
+
+    document
+        .getElementById("methodModal")
+        .classList.remove("show");
+
+}
+
+
+function selectMethod(element,method){
+
+    document
+        .querySelectorAll(".method")
+        .forEach(item=>{
+
+            item.classList.remove("selected");
+
+        });
+
+
+    element.classList.add("selected");
+
+    selectedMethod = method;
+
+
+    document
+        .getElementById("methodContinue")
+        .classList.remove("disabled");
+
+}
+
+
+/* =================================
+   CONFIRM
+================================= */
+
+function goConfirm(){
+
+    if(!selectedMethod){
+        return;
+    }
+
+
+    closeMethods();
+
+
+    document
+        .getElementById("confirmMethod")
+        .textContent =
+        selectedMethod;
+
+
+    setTimeout(()=>{
+
+        document
+            .getElementById("confirmModal")
+            .classList.add("show");
+
+    },120);
+
+}
+
+
+function closeConfirm(){
+
+    document
+        .getElementById("confirmModal")
+        .classList.remove("show");
+
+}
+
+
+/* =================================
+   FINISH
+================================= */
+
+function finishPayment(){
+
+    closeConfirm();
+
+
+    setTimeout(()=>{
+
+        showToast(
+            "Payment completed."
+        );
+
+
+        setTimeout(()=>{
+
+            turnOffFlashlight();
+
+            amountSelected = false;
+            selectedMethod = "";
+
+
+            document
+                .getElementById("amount499")
+                .classList.remove("selected");
+
+
+            document
+                .getElementById("amountContinue")
+                .classList.add("disabled");
+
+
+            document
+                .querySelectorAll(".method")
+                .forEach(item=>{
+
+                    item.classList.remove("selected");
+
+                });
+
+
+            document
+                .getElementById("methodContinue")
+                .classList.add("disabled");
+
+
+        },900);
+
+    },300);
+
+}
+
+
+/* =================================
+   LOGO FALLBACK
+================================= */
+
+function hideLogo(img){
+
+    img.style.display="none";
+
+}
+
+
+/* =================================
+   TOAST
+================================= */
+
+let toastTimer;
+
+function showToast(message){
+
+    const toast =
+        document.getElementById("toast");
+
+
+    toast.textContent = message;
+
+    toast.classList.add("show");
+
+
+    clearTimeout(toastTimer);
+
+
+    toastTimer =
+        setTimeout(()=>{
+
+            toast.classList.remove("show");
+
+        },2200);
+
+}
+
+
+/* =================================
+   CLOSE MODALS WHEN TAPPING BACKDROP
+================================= */
+
+document
+    .querySelectorAll(".modal")
+    .forEach(modal=>{
+
+        modal.addEventListener(
+            "click",
+            function(e){
+
+                if(e.target === modal){
+
+                    modal.classList.remove("show");
+
+                }
+
+            }
+        );
+
+    });
+
+</script>
+
+</body>
+</html>
